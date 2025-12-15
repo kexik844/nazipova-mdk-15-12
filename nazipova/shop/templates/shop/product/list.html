@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Каталог товаров{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-purple-800 mb-2">Каталог товаров</h1>
+    
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
+        <form method="get" class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Поиск товаров
+                </label>
+                <input type="text" 
+                       name="q" 
+                       value="{{ query }}"
+                       placeholder="Название или описание..."
+                       class="w-full px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            </div>
+            
+            <div class="min-w-[150px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Сортировка
+                </label>
+                <select name="sort" 
+                        class="w-full px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        onchange="this.form.submit()">
+                    <option value="">По умолчанию</option>
+                    <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>
+                        Цена ↑
+                    </option>
+                    <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>
+                        Цена ↓
+                    </option>
+                    <option value="new" {% if request.GET.sort == 'new' %}selected{% endif %}>
+                        Новинки
+                    </option>
+                </select>
+            </div>
+            
+            <button type="submit" 
+                    class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition">
+                🔍 Найти
+            </button>
+        </form>
+    </div>
+    
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-purple-700 mb-4">Категории</h2>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'shopik:product_list' %}" 
+               class="px-4 py-2 rounded-full {% if not category %}bg-purple-600 text-white{% else %}bg-purple-100 text-purple-700 hover:bg-purple-200{% endif %} transition">
+                Все товары
+            </a>
+            {% for cat in categories %}
+                <a href="{% url 'shopik:product_list_by_category' cat.slug %}" 
+                   class="px-4 py-2 rounded-full {% if category == cat %}bg-purple-600 text-white{% else %}bg-purple-100 text-purple-700 hover:bg-purple-200{% endif %} transition">
+                    {{ cat.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for product in products %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="h-48 overflow-hidden">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" 
+                             alt="{{ product.name }}"
+                             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                            <span class="text-gray-400">Нет фото</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="p-4">
+                    <a href="{{ product.get_absolute_url }}" 
+                       class="text-lg font-semibold text-purple-800 hover:text-purple-600 transition block mb-2">
+                        {{ product.name }}
+                    </a>
+                    
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {{ product.description|truncatewords:20 }}
+                    </p>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-2xl font-bold text-pink-600">
+                            {{ product.price }} ₽
+                        </span>
+                        
+                        <div class="flex items-center">
+                            {% if product.stock > 0 %}
+                                <span class="text-sm text-green-600 mr-2">
+                                    ✔ В наличии
+                                </span>
+                                <form action="{% url 'cart:cart_add' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="override" value="false">
+                                    <button type="submit" 
+                                            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg text-sm hover:from-purple-600 hover:to-pink-600 transition">
+                                        В корзину
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-sm text-red-600">
+                                    ❌ Нет в наличии
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-full text-center py-12">
+                <p class="text-xl text-gray-600">Товары не найдены</p>
+                <a href="{% url 'shopik:product_list' %}" 
+                   class="inline-block mt-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition">
+                    Смотреть все товары
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

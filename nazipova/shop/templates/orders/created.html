@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Заказ оформлен{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto text-center">
+    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-lg p-12">
+        <div class="text-6xl mb-6">🎉</div>
+        <h1 class="text-3xl font-bold text-purple-800 mb-4">
+            Заказ успешно оформлен!
+        </h1>
+        
+        <div class="bg-white rounded-lg p-6 mb-8 shadow-inner">
+            <p class="text-xl mb-2">
+                Номер вашего заказа: 
+                <span class="font-bold text-pink-600">#{{ order.id }}</span>
+            </p>
+            <p class="text-gray-600 mb-4">
+                {{ order.created_at|date:"d.m.Y в H:i" }}
+            </p>
+            
+            <div class="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                Статус: {{ order.get_status_display }}
+            </div>
+        </div>
+        
+        <div class="space-y-4 mb-10">
+            <p class="text-lg text-gray-700">
+                Мы свяжемся с вами по телефону <strong>{{ order.phone }}</strong> для подтверждения заказа.
+            </p>
+            <p class="text-gray-600">
+                Вы можете отслеживать статус заказа в 
+                <a href="{% url 'orders:order_list' %}" 
+                   class="text-purple-600 hover:text-purple-800 font-medium">
+                    личном кабинете
+                </a>.
+            </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'orders:order_list' %}" 
+               class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition">
+                Мои заказы
+            </a>
+            <a href="{% url 'shopik:product_list' %}" 
+               class="px-6 py-3 border-2 border-purple-500 text-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition">
+                Вернуться в магазин
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

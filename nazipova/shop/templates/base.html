@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Магазин{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7e22ce',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                        },
+                        pink: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Дополнительные стили для обеспечения sticky footer */
+        html, body {
+            height: 100%;
+        }
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .content-wrap {
+            flex: 1;
+        }
+    </style>
+</head>
+<body class="h-full bg-gradient-to-br from-purple-50 to-pink-50">
+    <div class="page-container">
+        <nav class="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex justify-between items-center">
+                    <a href="{% url 'shopik:product_list' %}" class="text-2xl font-bold">
+                        🛍️ Магазин
+                    </a>
+                    
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'shopik:product_list' %}" 
+                           class="hover:text-purple-200 transition">
+                            Каталог
+                        </a>
+                        
+                        <a href="{% url 'cart:cart_detail' %}" 
+                           class="relative hover:text-purple-200 transition">
+                            🛒 Корзина
+                            {% with total_items=cart|length %}
+                                {% if total_items > 0 %}
+                                    <span class="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {{ total_items }}
+                                    </span>
+                                {% endif %}
+                            {% endwith %}
+                        </a>
+                        
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'orders:order_list' %}" 
+                               class="hover:text-purple-200 transition">
+                                Мои заказы
+                            </a>
+                            <form action="{% url 'users:logout' %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        class="hover:text-purple-200 transition">
+                                    Выйти ({{ user.username }})
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'users:login' %}" 
+                               class="hover:text-purple-200 transition">
+                                Войти
+                            </a>
+                            <a href="{% url 'users:register' %}" 
+                               class="bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-100 transition">
+                                Регистрация
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        {% if messages %}
+            <div class="container mx-auto px-4 mt-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-lg mb-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <main class="content-wrap">
+            <div class="container mx-auto px-4 py-8">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+        
+        <footer class="bg-gradient-to-r from-purple-700 to-pink-700 text-white">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center">
+                    <p class="text-lg">Интернет-магазин</p>
+                    <p class="text-purple-200 mt-2">Сделано с ❤️</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
